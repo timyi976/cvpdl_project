@@ -1007,15 +1007,6 @@ def main():
                 # model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
                 model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
 
-                # TODO
-                # print('dtype of noisy_latents: ', noisy_latents.dtype)
-                # print('dtype of timesteps: ', timesteps.dtype)
-                # print('dtype of encoder_hidden_states: ', encoder_hidden_states.dtype)
-                # print('shape of noisy_latents: ', noisy_latents.shape)
-                # print('shape of timesteps: ', timesteps.shape)
-                # print('shape of encoder_hidden_states: ', encoder_hidden_states.shape)
-                # exit(0)
-
                 if args.snr_gamma is None:
                     loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
                 else:
