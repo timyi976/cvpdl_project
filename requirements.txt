@@ -4,3 +4,5 @@ datasets==2.11.0
 transformers==4.28.1
 fschat==0.2.26
 huggingface-hub==0.24.6
+protobuf
+sentencepiece
