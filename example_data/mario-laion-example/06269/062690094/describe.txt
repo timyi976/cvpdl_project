@@ -1,0 +1,5 @@
+in "Black font, thin lines, and smooth."
+town! "Black font, thin lines, and smooth."
+Best "Red font, Bold lines."
+hand "Red font, Bold lines."
+job "Red font, Bold lines."
