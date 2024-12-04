@@ -1,5 +1,6 @@
 accelerate launch train_textdiffuser2_t2i_lora.py \
-    --pretrained_model_name_or_path="stable-diffusion-v1-5/stable-diffusion-v1-5" \
+    --pretrained_model_name_or_path="JingyeChen22/textdiffuser2-full-ft" \
+    --stable_diffusion_model_name="stable-diffusion-v1-5/stable-diffusion-v1-5" \
     --train_batch_size=1 \
     --gradient_accumulation_steps=4 \
     --gradient_checkpointing \

@@ -153,6 +153,13 @@ def parse_args():
         help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
     parser.add_argument(
+        "--stable_diffusion_model_name",
+        type=str,
+        default=None,
+        required=True,
+        help="Pretrained stable diffusion model from huggingface.co/models.",
+    )
+    parser.add_argument(
         "--revision",
         type=str,
         default=None,
@@ -521,7 +528,7 @@ def main():
     noise_scheduler = DDPMScheduler.from_pretrained(args.pretrained_model_name_or_path, subfolder="scheduler")
     
     tokenizer = CLIPTokenizer.from_pretrained(
-        args.pretrained_model_name_or_path, subfolder="tokenizer", revision=args.revision
+        args.stable_diffusion_model_name, subfolder="tokenizer", revision=args.revision
     )
 
     #### additional tokens are introduced, including coordinate tokens and character tokens
@@ -546,7 +553,7 @@ def main():
         )
     text_encoder.resize_token_embeddings(len(tokenizer))
 
-    vae = AutoencoderKL.from_pretrained(args.pretrained_model_name_or_path, subfolder="vae", revision=args.revision)
+    vae = AutoencoderKL.from_pretrained(args.stable_diffusion_model_name, subfolder="vae", revision=args.revision)
 
     unet = UNet2DConditionModel.from_pretrained(
         args.pretrained_model_name_or_path, subfolder="unet", revision=args.revision
@@ -815,6 +822,8 @@ def main():
                 char_list = list(pred)
                 char_list = [f'[{i}]' for i in char_list]
                 ocr_ids.extend(char_list)
+                # TODO: text style description
+
                 ocr_ids.append(tokenizer.eos_token_id)
             ocr_ids.append(tokenizer.eos_token_id) 
 
