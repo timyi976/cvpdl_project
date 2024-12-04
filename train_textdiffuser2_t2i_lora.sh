@@ -11,8 +11,8 @@ accelerate launch train_textdiffuser2_t2i_lora.py \
     --output_dir="diffusion_experiment_result1" \
     --enable_xformers_memory_efficient_attention \
     --dataloader_num_workers=8 \
-    --index_file_path='/nfs/nas-6.1/gtyi/cvpdl_final/data/index.txt' \
-    --dataset_path='/nfs/nas-6.1/gtyi/cvpdl_final/data/mario-laion-example' \
+    --index_file_path='./example_data/index.txt' \
+    --dataset_path='./example_data/mario-laion-example' \
     --granularity=128 \
     --coord_mode="ltrb" \
     --max_length=77 \
