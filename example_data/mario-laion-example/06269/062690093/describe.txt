@@ -1,5 +1,5 @@
-in Black font, thin lines, and smooth.
-town! Black font, thin lines, and smooth.
-Best Black font, thin lines, and smooth.
-hand Black font, thin lines, and smooth.
-job Black font, thin lines, and smooth.
+in "Black font, thin lines, and smooth."
+town! "Black font, thin lines, and smooth."
+Best "Black font, thin lines, and smooth."
+hand "Black font, thin lines, and smooth."
+job "Black font, thin lines, and smooth."

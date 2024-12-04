@@ -1,4 +1,4 @@
-SHADOWSPEAR light green and bold text
-WIN white and thin text with balck shadow beside
-40K white and thin text with balck shadow beside
-CHAT white and bold text
+SHADOWSPEAR "light green and bold text"
+WIN "white and thin text with balck shadow beside"
+40K "white and thin text with balck shadow beside"
+CHAT "white and bold text"
