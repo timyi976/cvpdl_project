@@ -1,3 +1,0 @@
-FAMILIA "Blue, thin, sans-serif font, giving it a sleek and contemporary look."
-LITTLE "White, bold, serif font, with a clean and formal appearance."
-JOE "Black, bold, sans-serif font, simple and modern."
