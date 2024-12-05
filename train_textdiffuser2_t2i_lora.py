@@ -82,8 +82,11 @@ These are LoRA adaption weights for {base_model}. The weights were fine-tuned on
 #### check whether two boxes can be merged in the x-axis
 def check_merge(box1, box2):
 
-    x_center1, y_center1, x_min1, y_min1, x_max1, y_max1, pred1 = box1
-    x_center2, y_center2, x_min2, y_min2, x_max2, y_max2, pred2 = box2
+    x_center1, y_center1, x_min1, y_min1, x_max1, y_max1, pred1, style1 = box1
+    x_center2, y_center2, x_min2, y_min2, x_max2, y_max2, pred2, style2 = box2
+
+    if style1 != style2:
+        return False
 
     if y_center1 >= y_min2 and y_center1 <= y_max2:
         if y_center2 >= y_min1 and y_center2 <= y_max1:
@@ -110,7 +113,7 @@ def check_merge(box1, box2):
         x_center = (x_min + x_max) // 2
         y_center = (y_min + y_max) // 2
 
-        return [x_center, y_center, x_min, y_min, x_max, y_max, pred]
+        return [x_center, y_center, x_min, y_min, x_max, y_max, pred, style1]
 
     else:
         return False
@@ -763,6 +766,10 @@ def main():
             #### since the original ocr annotations are word-level, we need to merge some boxes to construct line-level ocr
             ocrs = open(f'{args.dataset_path}/{first}/{second}/ocr.txt').readlines()
 
+            # get text style description
+            with open(f'{args.dataset_path}/{first}/{second}/describe.json') as f:
+                text_style = json.load(f)
+
             ocrs_temp = []
             for line in ocrs:
                 line = line.strip()
@@ -775,17 +782,21 @@ def main():
                 y_max = max(y1, y2, y3, y4)
                 x_center = (x_min + x_max) // 2
                 y_center = (y_min + y_max) // 2
-                ocrs_temp.append([x_center, y_center, x_min, y_min, x_max, y_max, pred])
+                ocrs_temp.append([x_center, y_center, x_min, y_min, x_max, y_max, pred, text_style[pred]])
             ocrs_temp = sorted(ocrs_temp, key=lambda x: x[0])
             ocrs_temp = merge_boxes(ocrs_temp)
             ocrs_temp = sorted(ocrs_temp, key=lambda x: x[1])
 
+            # print("ocrs_temp:", ocrs_temp)
+
             random.shuffle(ocrs_temp) #### augment the ocr sequence for robust training
 
-            ocr_ids = [] #### concat with the prompt tokens
+            all_ocr_ids = [] #### concat with the prompt tokens
+            ocr_idx = {}
             for line in ocrs_temp:
+                ocr_ids = []
 
-                x_center, y_center, x_min, y_min, x_max, y_max, pred = line
+                x_center, y_center, x_min, y_min, x_max, y_max, pred, style = line
                 
                 # choose coord mode
                 if args.coord_mode == 'lt':
@@ -821,19 +832,65 @@ def main():
 
                 char_list = list(pred)
                 char_list = [f'[{i}]' for i in char_list]
-                ocr_ids.extend(char_list)
+                ocr_ids.extend(char_list) # [location] [alphabets]
+                ocr_ids_encoded = tokenizer.encode(ocr_ids)
                 # TODO: text style description
+                # print("first:", first)
+                # print("second:", second)
+                # print("pred:", pred)
+                # print("text_style:", text_style)
+                # print("style:", style)
+                # style = text_style[pred]
+                style_ids = tokenizer(style, truncation=True, return_tensors="pt").input_ids[0].tolist()[1:-1]
+                # print("style:", style)
+                # print("style_ids:", style_ids)
 
-                ocr_ids.append(tokenizer.eos_token_id)
-            ocr_ids.append(tokenizer.eos_token_id) 
+                ocr_ids_encoded_1 = ocr_ids_encoded[:-1]
+                ocr_ids_encoded_1.extend(style_ids)
+                ocr_ids_encoded_1.extend([tokenizer.eos_token_id, tokenizer.eos_token_id])
 
-            ocr_ids = tokenizer.encode(ocr_ids)
+                # print("ocr_ids_encoded_1:", ocr_ids_encoded_1)
+                # print("ocr_ids_encoded_1 decoded:", tokenizer.decode(ocr_ids_encoded_1))
+
+                # ocr_ids.extend(style_ids)
+                # # ocr_ids.extend(tokenizer(style, truncation=True, return_tensors="pt").input_ids[0].tolist())
+                # ocr_ids.append(tokenizer.eos_token_id)
+
+                # ocr_idx[pred] = {"char_ids": tokenizer.encode(ocr_ids), "style": tokenizer(style, truncation=True, return_tensors="pt").input_ids[0].tolist()}
+
+                all_ocr_ids.extend(ocr_ids_encoded_1)
+
+            # exit(0)
+
+            # ocr_ids.append(tokenizer.eos_token_id)
+            # print("old ocr_ids:", ocr_ids) 
+            # ocr_ids = tokenizer.encode(ocr_ids)
+            # print("new ocr_ids:", ocr_ids)
+
+            # ocr_ids = []
+
+            # for k, v in ocr_idx.items():
+            #     ocr_ids.extend(v["char_ids"])
+            #     ocr_ids.extend(v["style"])
+            #     ocr_ids.append(tokenizer.eos_token_id)
+
+            # ocr_ids.append(tokenizer.eos_token_id)
+
+            # ocr_ids = tokenizer.encode(ocr_ids)
 
             caption_ids = tokenizer(
                 caption, truncation=True, return_tensors="pt"
             ).input_ids[0].tolist() 
 
-            prompt = caption_ids + ocr_ids
+            prompt = caption_ids + all_ocr_ids
+
+            # print("ids:", prompt)
+            # print decoded prompt
+            # decoded_prompt = tokenizer.decode(prompt)
+            # print("decoded:", decoded_prompt)
+            # exit(0)
+
+
             prompt = prompt[:args.max_length]
             while len(prompt) < args.max_length: 
                 prompt.append(tokenizer.pad_token_id) 
