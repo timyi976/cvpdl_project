@@ -1,55 +1,88 @@
 import os
 import requests
-import re
 from PIL import Image
+from tqdm import tqdm
+from pathlib import Path
 
 def parse_input_file(file_path):
-    pattern = re.compile(r"^(\S+)\s+(\S+)$")
     parsed_data = []
-
-    with open(file_path, "r") as file:
+    with open(file_path, "r") as file, tqdm(unit=" images") as pbar:
         for line in file:
-            match = pattern.match(line.strip())
-            if match:
-                folder, url = match.groups()
-                parsed_data.append((folder, url))
+            if line.strip() == '': continue
+            key, url = line.strip().split(' ', 1)
+            parsed_data.append((key, url))
+            pbar.update(1)
     return parsed_data
 
-def download_images(image_urls, save_directory):
-    os.makedirs(save_directory, exist_ok=True)
-    for idx, (folder_path, url) in enumerate(image_urls):
-        print(f"Image {idx + 1}/{len(image_urls)}: ", end="")
-        if "jpg" not in url and "png" not in url:
-            print(f"Not a JPG or PNG file.")
-            continue
-        ext = "jpg" if "jpg" in url else "png"
-        try:
-            response = requests.get(url, stream=True, timeout=5)
-            response.raise_for_status()
-            # file_name = os.path.join(save_directory, f"image_{idx + 1}.jpg")
-            file_name = os.path.join(save_directory, f"{folder_path}.{ext}")
+def download_image(url, save_dir: Path):
+    if "jpg" not in url and "png" not in url:
+        print(f"Not a JPG or PNG file.")
+        raise
+    ext = "jpg" if ".jpg" in url else "png"
+    response = requests.get(url, stream=True, timeout=5)
+    response.raise_for_status()
+    os.makedirs(save_dir, exist_ok=True)
+    file_name = save_dir / f"image.{ext}"
+    orig_file_name = save_dir / f"image_orig.{ext}"
 
-            with open(file_name, "wb") as file:
-                for chunk in response.iter_content(1024):
-                    file.write(chunk)
+    with open(orig_file_name, "wb") as file:
+        for chunk in response.iter_content(1024):
+            file.write(chunk)
 
-            with Image.open(file_name) as img:
-                width, height = img.size
-                print(f"{width}×{height}")
+    with Image.open(orig_file_name) as img:
+        # width, height = img.size
+        # print(f"{width}×{height}")
+        new_img = scale_and_pad_to_512(img)
+        new_img.save(file_name)
 
-        except requests.exceptions.Timeout:
-            print(f"Download timeout. Skipping...")
+def scale_and_pad_to_512(img) -> Image.Image:
+    width, height = img.size
+    scale_factor = 512 / max(width, height)
+    new_width = int(width * scale_factor)
+    new_height = int(height * scale_factor)
+    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    new_img = Image.new("RGB", (512, 512), (255, 255, 255))
+    paste_x = (512 - new_width) // 2
+    paste_y = (512 - new_height) // 2
+    new_img.paste(img, (paste_x, paste_y))
+    return new_img
 
-        except requests.exceptions.RequestException:
-            print(f"Failed to download")
-        
-        except Exception:
-            print(f"Unknown error")
-            if os.path.exists(file_name):
-                os.remove(file_name)  # Remove file if it exists
-                print(f"Removed incomplete file: {file_name}")
+def try_download_image(url, save_dir: Path):
+    try:
+        download_image(url, save_dir)
+        return True
+    except requests.exceptions.Timeout:
+        print(f"Download timeout. Skipping...", save_dir)
+    except requests.exceptions.RequestException:
+        print(f"Failed to download", save_dir)
+    except Exception:
+        print(f"Unknown error", save_dir)
+    return False
+
+def download_images(urls, save_dir: Path):
+    success_images = []
+    for key, url in urls:
+        first, second = key.split("_")
+        success = try_download_image(url, save_dir / first / second)
+        if success: success_images.append(key)
+    return success_images
 
 if __name__ == "__main__":
-    image_urls = parse_input_file("laion-ocr-index-url.txt")
-    print(f"Total {len(image_urls)} Images")
-    download_images(image_urls, "images")
+    image_urls = parse_input_file("/nfs/nas-6.1/cvpdl_2024/laion-ocr-index-url.txt")
+    image_dict = dict(image_urls)
+    # key = "40530_405304116"
+    # url = image_dict.get(key)
+    # first, second = key.split("_")
+    # save_dir = Path.cwd() / "images" / first / second
+    # try_download_image(url, save_dir)
+    indeces = list(image_dict.keys())[:10]
+    save_dir = Path.cwd() / "images"
+    urls = [(key, image_dict.get(key)) for key in indeces]
+    success_images = download_images(urls, save_dir)
+    # TODO: move other files into image folder?
+
+    output_file = Path.cwd() / "index.txt"
+    with output_file.open("w") as file:
+        for key in success_images:
+            file.write(f"{key}\n")
+
