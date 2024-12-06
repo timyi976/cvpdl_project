@@ -1,4 +1,5 @@
 import os
+import shutil
 import requests
 from PIL import Image
 from tqdm import tqdm
@@ -16,7 +17,7 @@ def parse_input_file(file_path):
 
 def download_image(url, save_dir: Path):
     if "jpg" not in url and "png" not in url:
-        print(f"Not a JPG or PNG file.")
+        # print(f"Not a JPG or PNG file.")
         raise
     ext = "jpg" if ".jpg" in url else "png"
     response = requests.get(url, stream=True, timeout=5)
@@ -52,16 +53,20 @@ def try_download_image(url, save_dir: Path):
         download_image(url, save_dir)
         return True
     except requests.exceptions.Timeout:
-        print(f"Download timeout. Skipping...", save_dir)
+        # print(f"Download timeout. Skipping...", save_dir)
+        ...
     except requests.exceptions.RequestException:
-        print(f"Failed to download", save_dir)
+        # print(f"Failed to download", save_dir)
+        ...
     except Exception:
-        print(f"Unknown error", save_dir)
+        # print(f"Unknown error", url)
+        ...
     return False
 
 def download_images(urls, save_dir: Path):
     success_images = []
-    for key, url in urls:
+    for key, url in tqdm(urls, desc=f"Download images", ncols=0, unit=" images"):
+        if url == None: continue
         first, second = key.split("_")
         success = try_download_image(url, save_dir / first / second)
         if success: success_images.append(key)
@@ -75,11 +80,22 @@ if __name__ == "__main__":
     # first, second = key.split("_")
     # save_dir = Path.cwd() / "images" / first / second
     # try_download_image(url, save_dir)
-    indeces = list(image_dict.keys())[:10]
+    # indeces = list(image_dict.keys())[:10]
+    indeces = ["00000_000000012", "00000_000000036", "00000_000000044", "00000_000000061"]
     save_dir = Path.cwd() / "images"
     urls = [(key, image_dict.get(key)) for key in indeces]
     success_images = download_images(urls, save_dir)
+    print(f"Total {len(success_images)} images")
+
     # TODO: move other files into image folder?
+    source_folder = Path("/nfs/nas-6.1/cvpdl_2024/laion-ocr-all")
+    for key in success_images:
+        first, second = key.split("_")
+        images_source: Path = source_folder / first / first / second
+        images_dest: Path = save_dir / first / second
+        for file in images_source.iterdir():
+            if file.is_file(): # only files, skip directories
+                shutil.copy(file, images_dest / file.name)
 
     output_file = Path.cwd() / "index.txt"
     with output_file.open("w") as file:
