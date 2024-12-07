@@ -5,11 +5,11 @@ accelerate launch train_textdiffuser2_t2i_lora.py \
     --gradient_accumulation_steps=4 \
     --gradient_checkpointing \
     --mixed_precision="no" \
-    --num_train_epochs=6 \
+    --num_train_epochs=10 \
     --learning_rate=1e-4 \
     --text_encoder_learning_rate=1e-5 \
     --lr_scheduler="constant" \
-    --output_dir="diffusion_experiment_result1" \
+    --output_dir="diffusion_experiment_result_10epoch" \
     --enable_xformers_memory_efficient_attention \
     --dataloader_num_workers=8 \
     --index_file_path='./example_data/index.txt' \

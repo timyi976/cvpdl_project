@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# self-defined
+diffusion_experiment_result*/
+inference_results*/
+
 # C extensions
 *.so
 
