@@ -1,0 +1,1 @@
+ARM Cortex A53 vs Cortex A55
