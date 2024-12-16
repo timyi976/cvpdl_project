@@ -752,7 +752,11 @@ def main():
             
             #### get image
             image_path = f'{args.dataset_path}/{first}/{second}/image.jpg'
-            image = Image.open(image_path).convert("RGB")
+            try:
+                image = Image.open(image_path).convert("RGB")
+            except:
+                image_path = f'{args.dataset_path}/{first}/{second}/image.png'
+                image = Image.open(image_path).convert("RGB")
             images.append(image)
            
             #### get caption
@@ -767,8 +771,9 @@ def main():
             ocrs = open(f'{args.dataset_path}/{first}/{second}/ocr.txt').readlines()
 
             # get text style description
-            with open(f'{args.dataset_path}/{first}/{second}/describe.json') as f:
-                text_style = json.load(f)
+            # with open(f'{args.dataset_path}/{first}/{second}/describe.json') as f:
+            #     text_style = json.load(f)
+            text_style = json.load(open(f'{args.dataset_path}/{first}/{second}/describe.json'))
 
             ocrs_temp = []
             for line in ocrs:
@@ -782,7 +787,15 @@ def main():
                 y_max = max(y1, y2, y3, y4)
                 x_center = (x_min + x_max) // 2
                 y_center = (y_min + y_max) // 2
-                ocrs_temp.append([x_center, y_center, x_min, y_min, x_max, y_max, pred, text_style[pred]])
+                try:
+                    style = text_style.get(pred, '')
+                    ocrs_temp.append([x_center, y_center, x_min, y_min, x_max, y_max, pred, style])
+                except:
+                    print("error")#21693/216938250
+                    print(pred)
+                    print(image_path)
+                    print(text_style)
+                    exit(0)
             ocrs_temp = sorted(ocrs_temp, key=lambda x: x[0])
             ocrs_temp = merge_boxes(ocrs_temp)
             ocrs_temp = sorted(ocrs_temp, key=lambda x: x[1])
