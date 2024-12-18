@@ -378,7 +378,7 @@ def parse_args():
     parser.add_argument(
         "--checkpointing_steps",
         type=int,
-        default=1, 
+        default=4, 
         help=(
             "Save a checkpoint of the training state every X updates. These checkpoints are only suitable for resuming"
             " training using `--resume_from_checkpoint`."
@@ -932,7 +932,16 @@ def main():
 
 
     def collate_fn(examples): 
-        images = torch.stack([example["images"] for example in examples])
+        try:
+            images = torch.stack([example["images"] for example in examples])
+        except:
+            # iterate over the examples to find the one with different size of images
+            for example in examples:
+                if example["images"].size(0) != examples[0]["images"].size(0):
+                    print(example["images"].size())
+                    print(example)
+            # print(examples)
+            exit(0)
         images = images.to(memory_format=torch.contiguous_format).float()
 
         prompts_train = torch.Tensor([example["prompts_train"] for example in examples]).long()

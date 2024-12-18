@@ -1,15 +1,15 @@
 accelerate launch train_textdiffuser2_t2i_lora.py \
     --pretrained_model_name_or_path="JingyeChen22/textdiffuser2-full-ft" \
     --stable_diffusion_model_name="stable-diffusion-v1-5/stable-diffusion-v1-5" \
-    --train_batch_size=1 \
+    --train_batch_size=2 \
     --gradient_accumulation_steps=4 \
     --gradient_checkpointing \
     --mixed_precision="no" \
-    --num_train_epochs=6 \
+    --num_train_epochs=12 \
     --learning_rate=1e-4 \
     --text_encoder_learning_rate=1e-5 \
     --lr_scheduler="constant" \
-    --output_dir="diffusion_experiment_result_6epoch_1" \
+    --output_dir="diffusion_experiment_result_12epoch_1" \
     --enable_xformers_memory_efficient_attention \
     --dataloader_num_workers=8 \
     --index_file_path='./example_data/index.txt' \
@@ -17,4 +17,5 @@ accelerate launch train_textdiffuser2_t2i_lora.py \
     --granularity=128 \
     --coord_mode="ltrb" \
     --max_length=77 \
-    --resume_from_checkpoint="latest"
+    --resume_from_checkpoint="latest" \
+    --checkpointing_step 4

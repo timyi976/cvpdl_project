@@ -6,6 +6,7 @@ __pycache__/
 # self-defined
 diffusion_experiment_result*/
 inference_results*/
+*key
 
 # C extensions
 *.so
