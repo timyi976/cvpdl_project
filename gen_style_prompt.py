@@ -92,18 +92,30 @@ def formulate_keyword(keyword, layout, style):
 def generate_style(user_prompt, ocrs):
     keywords, layouts = split_keyword_layout(ocrs)
 
-    raw_response = generate(prompt_template(user_prompt, keywords))
-    # try to parse the response
-    # remove ```json and ``` from the response
-    response = raw_response.replace("```json", "").replace("```", "").strip()
-    # parse tmp with json
-    response = json.loads(response)
+    max_try = 3
+    try_count = 0
 
-    ret = f"<|startoftext|> {response['prompt']} <|endoftext|>"
-    for keyword, layout in zip(keywords, layouts):
-        ret += formulate_keyword(keyword, layout, response['styles'][keyword])
+    for _ in range(max_try):
+        try:
+            raw_response = generate(prompt_template(user_prompt, keywords))
+            # try to parse the response
+            # remove ```json and ``` from the response
+            response = raw_response.replace("```json", "").replace("```", "").strip()
+            # parse tmp with json
+            response = json.loads(response)
 
-    ret += "<|endoftext|><|endoftext|>"
+            ret = f"<|startoftext|> {response['prompt']} <|endoftext|>"
+            for keyword, layout in zip(keywords, layouts):
+                ret += formulate_keyword(keyword, layout, response['styles'][keyword])
+
+            ret += "<|endoftext|><|endoftext|>"
+            
+            break
+        except Exception as e:
+            print(f"Error: {e}")
+            try_count += 1
+
+    print(f"failed try counts: {try_count}")
 
     return ret
 
