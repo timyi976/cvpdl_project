@@ -6,3 +6,5 @@ fschat==0.2.26
 huggingface-hub==0.24.6
 protobuf
 sentencepiece
+gradio
+openai

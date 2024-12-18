@@ -1,5 +1,23 @@
 # CVPDL Project
 
+## Training
+
+- Edit argument `--output_dir` in `train_textdiffuser2_t2i_lora.sh` accordingly.
+
+- Run the script, and the LoRA checkpoint will be saved in the designated directory.
+    ```bash
+    bash train_textdiffuser2_t2i_lora.sh
+    ```
+
+## Demo and Inference
+
+- Create a file to store your OpenAI API key.
+
+- Run following command, then open the provided Gradio web URL in your browser.
+    ```bash
+    python3 frontend.py --api_key_file [your OpenAI API key file] --lora_ckpt [path to your trained LoRA checkpoint]
+    ```
+
 ## Env Install
 
 - Install Pytorch
