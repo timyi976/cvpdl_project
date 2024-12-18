@@ -2,7 +2,11 @@ from openai import OpenAI
 import json
 
 if True:
-    api_key = "TYPE_YOUR_API_KEY_HERE"
+    openai_api_key = "TYPE_YOUR_API_KEY_HERE"
+
+def set_api_key(key):
+    global openai_api_key
+    openai_api_key = key
 
 def prompt_template(user_prompt, keywords):
     task_prompt = """You will be given a prompt by an user that will be used to generate an image, and several keywords that need to be added into generated image. Your task involves two steps.
@@ -41,7 +45,7 @@ You only need to put your answer in the following format:
 # prompt_template('A bottle has green, sleek and bold font of "Energy" and "Drink" on it.', ["Energy", "Drink"])
 
 def generate(prompt):
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=openai_api_key)
 
     completion = client.chat.completions.create(
         model="gpt-4o-mini",

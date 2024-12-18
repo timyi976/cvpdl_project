@@ -275,8 +275,8 @@ DATASET_NAME_MAPPING = {
     "MARIO-10M": ("image", "text"), 
 }
 
-def get_args():
-    args = argparse.Namespace(allow_tf32=False, cfg=7.5, coord_mode='ltrb', dataset_name='lambdalabs/pokemon-blip-captions', enable_xformers_memory_efficient_attention=True, gradient_accumulation_steps=4, gradient_checkpointing=True, granularity=128, hub_model_id=None, hub_token=None, input_file=None, input_format='prompt', input_prompt='a text image of hello world', local_rank=-1, logging_dir='logs', m1_model_path='JingyeChen22/textdiffuser2_layout_planner', max_length=77, mixed_precision='no', output_dir='inference_results', pretrained_model_name_or_path='JingyeChen22/textdiffuser2-full-ft', prompts_txt_file=None, push_to_hub=False, rank=4, report_to='tensorboard', resolution=43512, resume_from_checkpoint='/nfs/nas-6.1/gtyi/cvpdl_final/cvpdl_project/diffusion_experiment_result_6epoch_1/checkpoint-132', sample_steps=50, seed=None, stable_diffusion_model_name='stable-diffusion-v1-5/stable-diffusion-v1-5', vis_num=1)
+def get_args(checkpoint_path):
+    args = argparse.Namespace(allow_tf32=False, cfg=7.5, coord_mode='ltrb', dataset_name='lambdalabs/pokemon-blip-captions', enable_xformers_memory_efficient_attention=True, gradient_accumulation_steps=4, gradient_checkpointing=True, granularity=128, hub_model_id=None, hub_token=None, input_file=None, input_format='prompt', input_prompt='a text image of hello world', local_rank=-1, logging_dir='logs', m1_model_path='JingyeChen22/textdiffuser2_layout_planner', max_length=77, mixed_precision='no', output_dir='inference_results', pretrained_model_name_or_path='JingyeChen22/textdiffuser2-full-ft', prompts_txt_file=None, push_to_hub=False, rank=4, report_to='tensorboard', resolution=43512, resume_from_checkpoint=checkpoint_path, sample_steps=50, seed=None, stable_diffusion_model_name='stable-diffusion-v1-5/stable-diffusion-v1-5', vis_num=1)
 
     return args
 
