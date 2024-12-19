@@ -67,7 +67,10 @@ def split_keyword_layout(ocrs):
     layouts = []
 
     for ocr in ocrs:
-        keyword, layout = ocr.split(" ")
+        tmp = ocr.split(" ")
+        layout = tmp[-1]
+        keyword = " ".join(tmp[:-1])
+        # keyword, layout = ocr.split(" ")
         layout = [int(x) for x in layout.split(",")]
         keywords.append(keyword)
         layouts.append(layout)
@@ -75,7 +78,7 @@ def split_keyword_layout(ocrs):
     return keywords, layouts
 
 def formulate_keyword(keyword, layout, style):
-    prefix = "lrtb"
+    prefix = "ltrb"
     ret = "<|startoftext|>"
 
     for p, co in zip(prefix, layout):
@@ -92,30 +95,18 @@ def formulate_keyword(keyword, layout, style):
 def generate_style(user_prompt, ocrs):
     keywords, layouts = split_keyword_layout(ocrs)
 
-    max_try = 3
-    try_count = 0
+    raw_response = generate(prompt_template(user_prompt, keywords))
+    # try to parse the response
+    # remove ```json and ``` from the response
+    response = raw_response.replace("```json", "").replace("```", "").strip()
+    # parse tmp with json
+    response = json.loads(response)
 
-    for _ in range(max_try):
-        try:
-            raw_response = generate(prompt_template(user_prompt, keywords))
-            # try to parse the response
-            # remove ```json and ``` from the response
-            response = raw_response.replace("```json", "").replace("```", "").strip()
-            # parse tmp with json
-            response = json.loads(response)
+    ret = f"<|startoftext|> {response['prompt']} <|endoftext|>"
+    for keyword, layout in zip(keywords, layouts):
+        ret += formulate_keyword(keyword, layout, response['styles'][keyword])
 
-            ret = f"<|startoftext|> {response['prompt']} <|endoftext|>"
-            for keyword, layout in zip(keywords, layouts):
-                ret += formulate_keyword(keyword, layout, response['styles'][keyword])
-
-            ret += "<|endoftext|><|endoftext|>"
-            
-            break
-        except Exception as e:
-            print(f"Error: {e}")
-            try_count += 1
-
-    print(f"failed try counts: {try_count}")
+    ret += "<|endoftext|><|endoftext|>"
 
     return ret
 
