@@ -14,6 +14,7 @@ def parse_args():
 
     return parser.parse_args()
 
+
 pipe_args = parse_args()
 
 set_openai_api_key(open(pipe_args.api_key_file).read().strip())
@@ -55,7 +56,15 @@ with gr.Blocks() as demo:
             # Left column: Text input box and "Generate" button
             prompt_input = gr.Textbox(label="Enter your prompt", placeholder="Describe an image...", lines=3)
             generate_button = gr.Button("Generate")
-        
+
+            gr.Markdown("""## Prompt Examples""")
+            gr.Examples([
+                ["A green and bold text."], 
+                ["A T-shirt with word \"Hello\". Text in blue."], 
+                ["A green notice board with word \"Right\". Text in White"], 
+                ["A beautiful city skyline stamp of shanghai, digital art, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation. Text in white, uppercase, space between."], 
+            ], [prompt_input])
+    
         with gr.Column():
             # Right column: Display generated prompt and image
             prompt_output = gr.Textbox(label="Generated Prompt", interactive=False, lines=3)

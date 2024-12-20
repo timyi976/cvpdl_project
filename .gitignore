@@ -7,6 +7,7 @@ __pycache__/
 diffusion_experiment_result*/
 inference_results*/
 *key
+examples/
 
 # C extensions
 *.so
