@@ -55,7 +55,7 @@ with gr.Blocks() as demo:
         with gr.Column():
             # Left column: Text input box and "Generate" button
             prompt_input = gr.Textbox(label="Enter your prompt", placeholder="Describe an image...", lines=3)
-            generate_button = gr.Button("Generate")
+            generate_button = gr.Button("Generate", variant="primary")
 
             gr.Markdown("""## Prompt Examples""")
             gr.Examples([
