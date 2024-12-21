@@ -1,21 +1,30 @@
 # CVPDL Project
 
-## Training
+***Text Styling Based on Textdiffuser-2***
 
-- Edit argument `--output_dir` in `train_textdiffuser2_t2i_lora.sh` accordingly.
+## Files
 
-- Run the script, and the LoRA checkpoint will be saved in the designated directory.
-    ```bash
-    bash train_textdiffuser2_t2i_lora.sh
+- Modified from the original repo
+    ```
+    # Training script
+    train_textdiffuser2_t2i_lora.py
+    train_textdiffuser2_t2i_lora.sh
+    # Inference script
+    inference_textdiffuser2_t2i_lora.py
+    inference_textdiffuser2_t2i_lora.sh
     ```
 
-## Demo and Inference
-
-- Create a file to store your OpenAI API key.
-
-- Run following command, then open the provided Gradio web URL in your browser.
-    ```bash
-    python3 frontend.py --api_key_file [your OpenAI API key file] --lora_ckpt [path to your trained LoRA checkpoint]
+- Our own scripts
+    ```
+    # Dataset related
+    download_images.py
+    generate_dataset.py
+    # Inference and Demo
+    inference_t2i_only.py
+    gen_layout.py
+    gen_style_prompt.py
+    gen_image.py
+    frontend.py
     ```
 
 ## Env Install
@@ -35,16 +44,32 @@
     pip3 install -U xformers --index-url https://download.pytorch.org/whl/cu118
     ```
 
-## TODO
+## Dataset
 
-- Generate text color and style description label for some of the images in the dataset
-- Edit `preprocess_train()` in `train_textdiffuser2_t2i_lora.py` to put text style description in the image prompt
-- `train_textdiffuser2_t2i_lora.py` finetune from the original Stable Diffusion v1.5 model, need to modifiy the code in order to finetune on their Text Diffuser 2 model
-- Use Lora to finetune model
-- Write inference script
-- Create Gradio interface for demo
+- Run following command.
+    ```bash
+    python3 generate_dataset.py
+    ```
 
-## Resources
+## Training
 
-- Original repo: [https://github.com/microsoft/unilm/tree/master/textdiffuser-2](https://github.com/microsoft/unilm/tree/master/textdiffuser-2)
+- Edit argument `--output_dir` in `train_textdiffuser2_t2i_lora.sh` accordingly.
+
+- Run the script, and the LoRA checkpoint will be saved in the designated directory.
+    ```bash
+    bash train_textdiffuser2_t2i_lora.sh
+    ```
+
+## Demo and Inference
+
+- Create a file to store your OpenAI API key.
+
+- Run following command, then open the provided Gradio web URL in your browser.
+    ```bash
+    python3 frontend.py --api_key_file [your OpenAI API key file] --lora_ckpt [path to your trained LoRA checkpoint]
+    ```
+
+## Reference
+
+- Original Textdiffuser-2: [https://github.com/microsoft/unilm/tree/master/textdiffuser-2](https://github.com/microsoft/unilm/tree/master/textdiffuser-2)
 - Hugging Face Diffuser Example scripts: [https://github.com/huggingface/diffusers/tree/main/examples/text_to_image](https://github.com/huggingface/diffusers/tree/main/examples/text_to_image)
